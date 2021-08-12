@@ -186,7 +186,11 @@ export const routes: RoutesEx = [
     },
     {
         mainNav: ["topology"],
-        path: "/esdl", action: () => import("./layouts/DojoAdapter").then(_ => <_.DojoAdapter widgetClassID="DynamicESDLQueryWidget" />)
+        path: "/esdl",
+        children: [
+            { path: "", action: (ctx, params) => import("./components/DynamicESDL").then(_ => <_.DynamicESDL tab={params.Tab as string} />) },
+            { path: "/:Tab", action: (ctx, params) => import("./components/DynamicESDL").then(_ => <_.DynamicESDL tab={params.Tab as string} />) }
+        ]
     },
     {
         mainNav: ["topology"],

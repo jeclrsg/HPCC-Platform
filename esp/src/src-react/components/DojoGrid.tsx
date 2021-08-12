@@ -29,6 +29,7 @@ interface DojoGridProps {
     sort?: any;
     columns: any;
     getSelected?: () => any[];
+    selectionMode?: string;
     setGrid: (_: any) => void;
     setSelection: (_: any[]) => void;
 }
@@ -40,6 +41,7 @@ export const DojoGrid: React.FunctionComponent<DojoGridProps> = ({
     sort,
     columns,
     getSelected,
+    selectionMode,
     setGrid,
     setSelection
 }) => {
@@ -66,6 +68,7 @@ export const DojoGrid: React.FunctionComponent<DojoGridProps> = ({
         if (query !== undefined) retVal.query = query;
         if (sort !== undefined) retVal.sort = sort;
         if (columns !== undefined) retVal.columns = columns;
+        if (selectionMode !== undefined) retVal.selectionMode = selectionMode;
         return retVal;
     }, [columns, getSelected, query, sort, store]);
 

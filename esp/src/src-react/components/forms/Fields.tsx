@@ -3,6 +3,7 @@ import { Checkbox, Dropdown as DropdownBase, TextField, IDropdownOption, Link, P
 import { TextField as MaterialUITextField } from "@material-ui/core";
 import { Topology, TpLogicalClusterQuery } from "@hpcc-js/comms";
 import { TpDropZoneQuery, TpGroupQuery, TpServiceQuery } from "src/WsTopology";
+import * as WsESDLConfig from "src/WsESDLConfig";
 import { States } from "src/WsWorkunits";
 import { FileList, States as DFUStates } from "src/FileSpray";
 import nlsHPCC from "src/nlsHPCC";
@@ -48,7 +49,8 @@ export type FieldType = "string" | "number" | "checkbox" | "datetime" | "dropdow
     "queries-priority" | "queries-suspend-state" | "queries-active-state" |
     "target-cluster" | "target-dropzone" | "target-server" | "target-group" |
     "target-dfuqueue" |
-    "logicalfile-type" | "dfuworkunit-state";
+    "logicalfile-type" | "dfuworkunit-state" |
+    "esdl-esp-processes" | "esdl-definitions";
 
 export type Values = { [name: string]: string | number | boolean | (string | number | boolean)[] };
 
@@ -154,6 +156,16 @@ interface DFUWorkunitStateField extends BaseField {
     value?: string;
 }
 
+interface EsdlEspProcessesField extends BaseField {
+    type: "esdl-esp-processes";
+    value?: string;
+}
+
+interface EsdlDefinitionsField extends BaseField {
+    type: "esdl-definitions";
+    value?: string;
+}
+
 interface LinkField extends BaseField {
     type: "link";
     href: string;
@@ -178,7 +190,8 @@ type Field = StringField | NumericField | CheckboxField | DateTimeField | Dropdo
     QueriesPriorityField | QueriesSuspendStateField | QueriesActiveStateField |
     TargetClusterField | TargetDropzoneField | TargetServerField | TargetGroupField |
     TargetDfuSprayQueueField |
-    LogicalFileType | DFUWorkunitStateField;
+    LogicalFileType | DFUWorkunitStateField |
+    EsdlEspProcessesField | EsdlDefinitionsField;
 
 export type Fields = { [id: string]: Field };
 
@@ -349,6 +362,68 @@ export const TargetDfuSprayQueueTextField: React.FunctionComponent<TargetDfuSpra
     }, []);
 
     return <Dropdown {...props} options={dfuSprayQueues} />;
+};
+export interface EsdlEspProcessesTextFieldProps {
+    key: string;
+    label?: string;
+    selectedKey?: string;
+    className?: string;
+    required?: boolean;
+    optional?: boolean;
+    errorMessage?: string;
+    onChange?: (event: React.FormEvent<HTMLDivElement>, option?: IDropdownOption, index?: number) => void;
+    placeholder?: string;
+}
+
+export const EsdlEspProcessesTextField: React.FunctionComponent<EsdlEspProcessesTextFieldProps> = (props) => {
+
+    const [espProcesses, setEspProcesses] = React.useState<IDropdownOption[]>([]);
+
+    React.useEffect(() => {
+        WsESDLConfig.ListESDLBindings({}).then(({ ListESDLBindingsResponse }) => {
+            setEspProcesses(
+                ListESDLBindingsResponse.EspProcesses.EspProcess.map(proc => {
+                    return {
+                        key: proc.Name,
+                        text: proc.Name
+                    };
+                })
+            );
+        });
+    }, []);
+
+    return <Dropdown {...props} options={espProcesses} />;
+};
+export interface EsdlDefinitionsTextFieldProps {
+    key: string;
+    label?: string;
+    selectedKey?: string;
+    className?: string;
+    required?: boolean;
+    optional?: boolean;
+    errorMessage?: string;
+    onChange?: (event: React.FormEvent<HTMLDivElement>, option?: IDropdownOption, index?: number) => void;
+    placeholder?: string;
+}
+
+export const EsdlDefinitionsTextField: React.FunctionComponent<EsdlDefinitionsTextFieldProps> = (props) => {
+
+    const [definitions, setDefinitions] = React.useState<IDropdownOption[]>([]);
+
+    React.useEffect(() => {
+        WsESDLConfig.ListESDLDefinitions({}).then(({ ListESDLDefinitionsResponse }) => {
+            setDefinitions(
+                ListESDLDefinitionsResponse.Definitions.Definition.map(defn => {
+                    return {
+                        key: defn.Id,
+                        text: defn.Id
+                    };
+                })
+            );
+        });
+    }, []);
+
+    return <Dropdown {...props} options={definitions} />;
 };
 
 export interface TargetFolderTextFieldProps {
@@ -720,6 +795,32 @@ export function createInputs(fields: Fields, onChange?: (id: string, newValue: a
                     id: fieldID,
                     label: field.label,
                     field: <TargetDfuSprayQueueTextField
+                        key={fieldID}
+                        selectedKey={field.value}
+                        onChange={(ev, row) => onChange(fieldID, row.key)}
+                        placeholder={field.placeholder}
+                    />
+                });
+                break;
+            case "esdl-esp-processes":
+                field.value = field.value !== undefined ? field.value : "";
+                retVal.push({
+                    id: fieldID,
+                    label: field.label,
+                    field: <EsdlEspProcessesTextField
+                        key={fieldID}
+                        selectedKey={field.value}
+                        onChange={(ev, row) => onChange(fieldID, row.key)}
+                        placeholder={field.placeholder}
+                    />
+                });
+                break;
+            case "esdl-definitions":
+                field.value = field.value !== undefined ? field.value : "";
+                retVal.push({
+                    id: fieldID,
+                    label: field.label,
+                    field: <EsdlDefinitionsTextField
                         key={fieldID}
                         selectedKey={field.value}
                         onChange={(ev, row) => onChange(fieldID, row.key)}
