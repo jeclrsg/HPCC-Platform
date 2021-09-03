@@ -133,7 +133,7 @@ export const SlaveLogs: React.FunctionComponent<SlaveLogsProps> = ({
                         { key: "2", text: nlsHPCC.Zip },
                         { key: "3", text: nlsHPCC.GZip },
                     ]}
-                    defaultSelectedKey="1"
+                    selectedKey={value}
                     onChange={(evt, option) => {
                         onChange(option.key);
                     }}

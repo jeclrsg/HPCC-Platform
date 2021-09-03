@@ -38,30 +38,23 @@ const Dropdown: React.FunctionComponent<DropdownProps> = ({
     className
 }) => {
     React.useEffect(() => {
-        if (required === true && optional == false) {
-            logger.error(`${label} (${key}):  required == true and optional == false is illogical`);
+        if (required === true && optional == true) {
+            logger.error(`${label} (${key}):  required == true and optional == true is illogical`);
         }
     }, [key, label, optional, required]);
 
     const [selOptions, setSelOptions] = React.useState<IDropdownOption[]>([]);
     const [selectedKey, setSelectedKey] = React.useState<string | number | undefined>(defaultSelectedKey);
 
-    const handleOnChange = React.useCallback((evt, row) => {
-        if (onChange) {
-            onChange(evt, row);
-        }
-        setSelectedKey(row.key);
-    }, [onChange]);
-
     React.useEffect(() => {
         const selOptions = (optional ? [{ key: "", text: "" }, ...options] : [...options]);
         if (!optional && !defaultSelectedKey && selOptions.length) {
-            handleOnChange(undefined, selOptions[0]);
+            setSelectedKey(selOptions[0].key);
         }
         setSelOptions(selOptions);
-    }, [optional, options, defaultSelectedKey, handleOnChange]);
+    }, [optional, options, defaultSelectedKey, setSelectedKey]);
 
-    return <DropdownBase key={key} label={label} errorMessage={errorMessage} required={required} className={className} defaultSelectedKey={defaultSelectedKey} selectedKey={selectedKey} onChange={handleOnChange} placeholder={placeholder} options={selOptions} disabled={disabled} />;
+    return <DropdownBase key={key} label={label} errorMessage={errorMessage} required={required} className={className} defaultSelectedKey={selectedKey} onChange={onChange} placeholder={placeholder} options={selOptions} disabled={disabled} />;
 };
 
 export type FieldType = "string" | "number" | "checkbox" | "datetime" | "dropdown" | "link" | "links" | "progress" |
@@ -81,6 +74,7 @@ interface BaseField {
     placeholder?: string;
     readonly?: boolean;
     required?: boolean;
+    optional?: boolean;
 }
 
 interface StringField extends BaseField {
@@ -596,7 +590,7 @@ export function createInputs(fields: Fields, onChange?: (id: string, newValue: a
                     label: field.label,
                     field: <Dropdown
                         key={fieldID}
-                        defaultSelectedKey={field.value}
+                        // defaultSelectedKey={field.value}
                         optional
                         options={states.map(state => {
                             return {
@@ -616,7 +610,7 @@ export function createInputs(fields: Fields, onChange?: (id: string, newValue: a
                     label: field.label,
                     field: <Dropdown
                         key={fieldID}
-                        defaultSelectedKey={field.value}
+                        // defaultSelectedKey={field.value}
                         options={[
                             { key: "", text: nlsHPCC.LogicalFilesAndSuperfiles },
                             { key: "Logical Files Only", text: nlsHPCC.LogicalFilesOnly },
@@ -655,7 +649,7 @@ export function createInputs(fields: Fields, onChange?: (id: string, newValue: a
                     label: field.label,
                     field: <Dropdown
                         key={fieldID}
-                        defaultSelectedKey={field.value.toString()}
+                        // defaultSelectedKey={field.value.toString()}
                         options={[
                             { key: "", text: nlsHPCC.None },
                             { key: "0", text: nlsHPCC.Low },
@@ -674,7 +668,7 @@ export function createInputs(fields: Fields, onChange?: (id: string, newValue: a
                     label: field.label,
                     field: <Dropdown
                         key={fieldID}
-                        defaultSelectedKey={field.value}
+                        // defaultSelectedKey={field.value}
                         optional
                         options={[
                             { key: "Not suspended", text: nlsHPCC.NotSuspended },
@@ -695,7 +689,7 @@ export function createInputs(fields: Fields, onChange?: (id: string, newValue: a
                     label: field.label,
                     field: <Dropdown
                         key={fieldID}
-                        defaultSelectedKey={field.value}
+                        // defaultSelectedKey={field.value}
                         optional
                         options={[
                             { key: "1", text: nlsHPCC.Active },
@@ -713,7 +707,7 @@ export function createInputs(fields: Fields, onChange?: (id: string, newValue: a
                     label: field.label,
                     field: <TargetClusterTextField
                         key={fieldID}
-                        defaultSelectedKey={field.value}
+                        // defaultSelectedKey={field.value}
                         onChange={(ev, row) => onChange(fieldID, row.key)}
                         placeholder={field.placeholder}
                     />
@@ -726,7 +720,7 @@ export function createInputs(fields: Fields, onChange?: (id: string, newValue: a
                     label: field.label,
                     field: <TargetDropzoneTextField
                         key={fieldID}
-                        defaultSelectedKey={field.value}
+                        // defaultSelectedKey={field.value}
                         onChange={(ev, row) => {
                             onChange(fieldID, row.key);
                             setDropzone(row.key as string);
@@ -742,7 +736,7 @@ export function createInputs(fields: Fields, onChange?: (id: string, newValue: a
                     label: field.label,
                     field: <TargetServerTextLinkedField
                         key={fieldID}
-                        defaultSelectedKey={field.value}
+                        // defaultSelectedKey={field.value}
                         onChange={(ev, row) => onChange(fieldID, row.key)}
                         placeholder={field.placeholder}
                         setSetDropzone={_ => setDropzone = _}

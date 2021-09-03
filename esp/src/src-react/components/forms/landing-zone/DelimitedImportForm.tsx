@@ -249,7 +249,7 @@ export const DelimitedImportForm: React.FunctionComponent<DelimitedImportFormPro
                             field: { onChange, name: fieldName, value },
                             fieldState: { error }
                         }) => <Dropdown
-                                key="sourceFormat"
+                                key={fieldName}
                                 label={nlsHPCC.Format}
                                 options={[
                                     { key: "1", text: "ASCII" },
@@ -262,7 +262,7 @@ export const DelimitedImportForm: React.FunctionComponent<DelimitedImportFormPro
                                     { key: "8", text: "UTF-32LE" },
                                     { key: "9", text: "UTF-32BE" }
                                 ]}
-                                defaultSelectedKey="1"
+                                selectedKey={value}
                                 onChange={(evt, option) => {
                                     onChange(option.key);
                                 }}

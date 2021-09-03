@@ -22,7 +22,7 @@ const FilterFields: Fields = {
     "NodeGroup": { type: "target-group", label: nlsHPCC.Group, placeholder: nlsHPCC.Cluster },
     "FileSizeFrom": { type: "string", label: nlsHPCC.FromSizes, placeholder: "4096" },
     "FileSizeTo": { type: "string", label: nlsHPCC.ToSizes, placeholder: "16777216" },
-    "FileType": { type: "file-type", label: nlsHPCC.FileType },
+    "FileType": { type: "file-type", label: nlsHPCC.FileType, optional: false },
     "FirstN": { type: "string", label: nlsHPCC.FirstN, placeholder: "-1" },
     // "Sortby": { type: "file-sortby", label: nlsHPCC.FirstNSortBy, disabled: (params: Fields) => !params.FirstN.value },
     "StartDate": { type: "datetime", label: nlsHPCC.FromDate, placeholder: "" },

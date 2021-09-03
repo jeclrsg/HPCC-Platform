@@ -48,6 +48,9 @@ function formatQuery(_filter) {
             filter.EndDate = new Date(filter.StartDate).toISOString();
         }
     }
+    if (filter.Type) {
+        filter.Type = "archived workunits"
+    }
     logger.debug(filter);
     return filter;
 }
