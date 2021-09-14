@@ -4,6 +4,7 @@ import { TextField as MaterialUITextField } from "@material-ui/core";
 import { Topology, TpLogicalClusterQuery } from "@hpcc-js/comms";
 import { scopedLogger } from "@hpcc-js/util";
 import { TpDropZoneQuery, TpGroupQuery, TpServiceQuery } from "src/WsTopology";
+import * as WsAccess from "src/ws_access";
 import { States } from "src/WsWorkunits";
 import { FileList, States as DFUStates } from "src/FileSpray";
 import nlsHPCC from "src/nlsHPCC";
@@ -38,30 +39,23 @@ const Dropdown: React.FunctionComponent<DropdownProps> = ({
     className
 }) => {
     React.useEffect(() => {
-        if (required === true && optional == false) {
-            logger.error(`${label} (${key}):  required == true and optional == false is illogical`);
+        if (required === true && optional === true) {
+            logger.error(`${label} (${key}):  required == true and optional === true is illogical`);
         }
     }, [key, label, optional, required]);
 
     const [selOptions, setSelOptions] = React.useState<IDropdownOption[]>([]);
     const [selectedKey, setSelectedKey] = React.useState<string | number | undefined>(defaultSelectedKey);
 
-    const handleOnChange = React.useCallback((evt, row) => {
-        if (onChange) {
-            onChange(evt, row);
-        }
-        setSelectedKey(row.key);
-    }, [onChange]);
-
     React.useEffect(() => {
         const selOptions = (optional ? [{ key: "", text: "" }, ...options] : [...options]);
         if (!optional && !defaultSelectedKey && selOptions.length) {
-            handleOnChange(undefined, selOptions[0]);
+            setSelectedKey(selOptions[0].key);
         }
         setSelOptions(selOptions);
-    }, [optional, options, defaultSelectedKey, handleOnChange]);
+    }, [optional, options, defaultSelectedKey, setSelectedKey]);
 
-    return <DropdownBase key={key} label={label} errorMessage={errorMessage} required={required} className={className} defaultSelectedKey={defaultSelectedKey} selectedKey={selectedKey} onChange={handleOnChange} placeholder={placeholder} options={selOptions} disabled={disabled} />;
+    return <DropdownBase key={key} label={label} errorMessage={errorMessage} required={required} className={className} defaultSelectedKey={selectedKey} onChange={onChange} placeholder={placeholder} options={selOptions} disabled={disabled} />;
 };
 
 export type FieldType = "string" | "number" | "checkbox" | "datetime" | "dropdown" | "link" | "links" | "progress" |
@@ -69,7 +63,7 @@ export type FieldType = "string" | "number" | "checkbox" | "datetime" | "dropdow
     "file-type" | "file-sortby" |
     "queries-priority" | "queries-suspend-state" | "queries-active-state" |
     "target-cluster" | "target-dropzone" | "target-server" | "target-group" |
-    "target-dfuqueue" |
+    "target-dfuqueue" | "permission-type" |
     "logicalfile-type" | "dfuworkunit-state";
 
 export type Values = { [name: string]: string | number | boolean | (string | number | boolean)[] };
@@ -176,6 +170,11 @@ interface DFUWorkunitStateField extends BaseField {
     value?: string;
 }
 
+interface PermissionTypeField extends BaseField {
+    type: "permission-type";
+    value?: string;
+}
+
 interface LinkField extends BaseField {
     type: "link";
     href: string;
@@ -199,7 +198,7 @@ type Field = StringField | NumericField | CheckboxField | DateTimeField | Dropdo
     FileTypeField | FileSortByField |
     QueriesPriorityField | QueriesSuspendStateField | QueriesActiveStateField |
     TargetClusterField | TargetDropzoneField | TargetServerField | TargetGroupField |
-    TargetDfuSprayQueueField |
+    TargetDfuSprayQueueField | PermissionTypeField |
     LogicalFileType | DFUWorkunitStateField;
 
 export type Fields = { [id: string]: Field };
@@ -476,6 +475,40 @@ export const TargetFolderTextField: React.FunctionComponent<TargetFolderTextFiel
     }, [pathSepChar, machineAddress, machineDirectory, machineOS, fetchFolders]);
 
     return <Dropdown {...props} options={folders} />;
+};
+
+export interface PermissionTypeProps {
+    key: string;
+    label?: string;
+    selectedKey?: string;
+    className?: string;
+    required?: boolean;
+    optional?: boolean;
+    errorMessage?: string;
+    onChange?: (event: React.FormEvent<HTMLDivElement>, option?: IDropdownOption, index?: number) => void;
+    placeholder?: string;
+}
+
+export const PermissionTypeField: React.FunctionComponent<PermissionTypeProps> = (props) => {
+
+    const [baseDns, setBaseDns] = React.useState<IDropdownOption[]>([]);
+
+    React.useEffect(() => {
+        WsAccess.Permissions({}).then(({ BasednsResponse }) => {
+            const _basedns = BasednsResponse.Basedns.Basedn
+                .map(dn => {
+                    return {
+                        key: dn.name,
+                        text: dn.name
+                    };
+                });
+            _basedns.unshift({ key: "", text: "" });
+            setBaseDns(_basedns);
+        });
+    }, []);
+
+    return <Dropdown {...props} options={baseDns} />;
+
 };
 
 const states = Object.keys(States).map(s => States[s]);
@@ -755,6 +788,20 @@ export function createInputs(fields: Fields, onChange?: (id: string, newValue: a
                     id: fieldID,
                     label: field.label,
                     field: <TargetGroupTextField
+                        key={fieldID}
+                        required={field.required}
+                        selectedKey={field.value}
+                        onChange={(ev, row) => onChange(fieldID, row.key)}
+                        placeholder={field.placeholder}
+                    />
+                });
+                break;
+            case "permission-type":
+                field.value = field.value !== undefined ? field.value : "";
+                retVal.push({
+                    id: fieldID,
+                    label: field.label,
+                    field: <PermissionTypeField
                         key={fieldID}
                         required={field.required}
                         selectedKey={field.value}

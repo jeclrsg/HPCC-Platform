@@ -181,6 +181,7 @@ export const routes: RoutesEx = [
         children: [
             { path: "", action: (ctx, params) => import("./components/Security").then(_ => <_.Security filter={parseSearch(ctx.search) as any} />) },
             { path: "/:Tab", action: (ctx, params) => import("./components/Security").then(_ => <_.Security filter={parseSearch(ctx.search) as any} tab={params.Tab as string} />) },
+            { path: "/permissions/:Name/:BaseDn", action: (ctx, params) => import("./components/Security").then(_ => <_.Security tab="permissions" name={params.Name as string} baseDn={params.BaseDn as string} />) },
         ]
     },
     {
