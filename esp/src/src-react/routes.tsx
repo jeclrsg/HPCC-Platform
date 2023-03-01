@@ -2,7 +2,7 @@ import * as React from "react";
 import { Route, RouterContext } from "universal-router";
 import { initialize, parsePage, parseSearch, parseSort, pushUrl, replaceUrl } from "./util/history";
 
-export type MainNav = "activities" | "workunits" | "files" | "queries" | "topology" | "topology-bare-metal";
+export type MainNav = "activities" | "workunits" | "files" | "queries" | "topology" | "topology-bare-metal" | "operations";
 
 export interface RouteEx<R = any, C extends RouterContext = RouterContext> extends Route<R, C> {
     mainNav: MainNav[];
@@ -244,6 +244,15 @@ export const routes: RoutesEx = [
             { path: "/:Tab", action: (ctx, params) => import("./components/DynamicESDL").then(_ => <_.DynamicESDL tab={params.Tab as string} />) },
             { path: "/bindings/:Name", action: (ctx, params) => import("./components/DESDLBindingDetails").then(_ => <_.DESDLBindingDetails name={params.Name as string} />) },
             { path: "/bindings/:Name/:Tab", action: (ctx, params) => import("./components/DESDLBindingDetails").then(_ => <_.DESDLBindingDetails name={params.Name as string} tab={params.Tab as string} />) },
+        ]
+    },
+    {
+        mainNav: ["operations"],
+        path: "/operations",
+        children: [
+            { path: "", action: (ctx, params) => import("./components/Topology").then(_ => <_.Topology />) },
+            { path: "/:NetAddress/:Name", action: (ctx, params) => import("./components/ServerDetails").then(_ => <_.ServerDetails netAddress={params.NetAddress as string} compName={params.Name as string} />) },
+            { path: "/:NetAddress/:Name/:Tab", action: (ctx, params) => import("./components/ServerDetails").then(_ => <_.ServerDetails netAddress={params.NetAddress as string} compName={params.Name as string} tab={params.Tab as string} />) },
         ]
     },
     {
