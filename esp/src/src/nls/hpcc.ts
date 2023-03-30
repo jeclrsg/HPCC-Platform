@@ -385,6 +385,7 @@ export = {
         High: "High",
         History: "History",
         Homepage: "Homepage",
+        HostnameOrIPAddress: "Hostname or IP Address",
         Hotspots: "Hot spots",
         HPCCSystems: "HPCC Systems®",
         HTML: "HTML",

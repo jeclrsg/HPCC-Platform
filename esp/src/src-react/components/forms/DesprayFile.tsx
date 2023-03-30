@@ -168,7 +168,8 @@ export const DesprayFile: React.FunctionComponent<DesprayFileProps> = ({
                         key={fieldName}
                         dropzone={dropzone}
                         required={true}
-                        label={nlsHPCC.IPAddress}
+                        disabled={true}
+                        label={nlsHPCC.HostnameOrIPAddress}
                         selectedKey={value}
                         placeholder={nlsHPCC.SelectValue}
                         onChange={(evt, option) => {
