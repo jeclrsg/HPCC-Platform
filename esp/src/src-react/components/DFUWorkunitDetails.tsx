@@ -28,6 +28,7 @@ export const DFUWorkunitDetails: React.FunctionComponent<DFUWorkunitDetailsProps
     const [dfuWuData, setDfuWuData] = React.useState<any>(null);
     const [wuXML, setWuXML] = React.useState("");
     const [jobname, setJobname] = React.useState("");
+    const [sprayFormat, setSprayFormat] = React.useState("");
     const [_protected, setProtected] = React.useState(false);
 
     const [DeleteConfirm, setShowDeleteConfirm] = useConfirm({
@@ -49,6 +50,13 @@ export const DFUWorkunitDetails: React.FunctionComponent<DFUWorkunitDetailsProps
         if (!dfuWuData) return;
         setJobname(dfuWuData?.JobName);
         setProtected(dfuWuData?.isProtected);
+        if (dfuWuData?.RowTag) {
+            setSprayFormat(`(${nlsHPCC.XML} / ${nlsHPCC.JSON})`)
+        } else if (FileSpray.FormatMessages[dfuWuData?.SourceFormat] === "csv") {
+            setSprayFormat(`(${nlsHPCC.CSV})`);
+        } else if (FileSpray.FormatMessages[dfuWuData?.SourceFormat] === "fixed") {
+            setSprayFormat(`(${nlsHPCC.Fixed})`);
+        }
     }, [dfuWuData]);
 
     React.useEffect(() => {
@@ -143,7 +151,7 @@ export const DFUWorkunitDetails: React.FunctionComponent<DFUWorkunitDetailsProps
                         }
                     }} />
                     <hr />
-                    <h2>{nlsHPCC.Source} ({nlsHPCC.Fixed})</h2>
+                    <h2>{nlsHPCC.Source} {sprayFormat}</h2>
                     <TableGroup fields={{
                         "ip": { label: nlsHPCC.IP, type: "string", value: dfuWuData?.SourceIP, readonly: true },
                         "directory": { label: nlsHPCC.Directory, type: "string", value: dfuWuData?.SourceDirectory, readonly: true },
