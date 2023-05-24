@@ -24,7 +24,7 @@ const FilterFields: Fields = {
         ]
     },
     class: {
-        type: "dropdown", label: nlsHPCC.Class, options: [
+        type: "dropdown-multi", label: nlsHPCC.Class, options: [
             { key: LogType.Disaster, text: "Audit" },
             { key: LogType.Error, text: "Error" },
             { key: LogType.Information, text: "Information" },

@@ -139,7 +139,29 @@ const AsyncDropdown: React.FunctionComponent<AsyncDropdownProps> = ({
         <DropdownBase label={label} options={selOptions} selectedKey={selectedItem?.key} onChange={(_, item: IDropdownOption) => setSelectedItem(item)} placeholder={placeholder} disabled={disabled} required={required} errorMessage={errorMessage} className={className} />;
 };
 
-export type FieldType = "string" | "password" | "number" | "checkbox" | "choicegroup" | "datetime" | "dropdown" | "link" | "links" | "progress" |
+interface DropdownMultiProps {
+    selectedKeys?: string[];
+    options?: IDropdownOption[];
+}
+
+export const DropdownMulti: React.FunctionComponent<DropdownMultiProps> = ({
+    selectedKeys = [],
+    options = []
+}) => {
+    const [selectedItems, setSelectedItems] = React.useState<string[]>(selectedKeys);
+
+    const onChange = (event: React.FormEvent<HTMLDivElement>, item: IDropdownOption): void => {
+        if (item) {
+            const selected = item.selected ? [...selectedItems, item.key as string] : selectedItems.filter(key => key !== item.key);
+            setSelectedItems(selected);
+        }
+    };
+
+    return <DropdownBase options={options} multiSelect={true} selectedKeys={selectedItems} onChange={onChange} />;
+};
+
+export type FieldType = "string" | "password" | "number" | "checkbox" | "choicegroup" | "datetime" | "dropdown" | "dropdown-multi" |
+    "link" | "links" | "progress" |
     "workunit-state" |
     "file-type" | "file-sortby" |
     "queries-priority" | "queries-suspend-state" | "queries-active-state" |
@@ -192,6 +214,12 @@ interface ChoiceGroupField extends BaseField {
 interface DropdownField extends BaseField {
     type: "dropdown";
     value?: string;
+    options: IDropdownOption[];
+}
+
+interface DropdownMultiField extends BaseField {
+    type: "dropdown-multi";
+    value?: string[];
     options: IDropdownOption[];
 }
 
@@ -310,7 +338,8 @@ interface CloudContainerNameField extends BaseField {
     value?: string;
 }
 
-type Field = StringField | NumericField | CheckboxField | ChoiceGroupField | DateTimeField | DropdownField | LinkField | LinksField | ProgressField |
+type Field = StringField | NumericField | CheckboxField | ChoiceGroupField | DateTimeField | DropdownField | DropdownMultiField |
+    LinkField | LinksField | ProgressField |
     WorkunitStateField |
     FileTypeField | FileSortByField |
     QueriesPriorityField | QueriesSuspendStateField | QueriesActiveStateField |
@@ -767,6 +796,17 @@ export function createInputs(fields: Fields, onChange?: (id: string, newValue: a
                         options={field.options}
                         onChange={(ev, row) => onChange(fieldID, row.key)}
                         placeholder={field.placeholder}
+                    />
+                });
+                break;
+            case "dropdown-multi":
+                retVal.push({
+                    id: fieldID,
+                    label: field.label,
+                    field: <DropdownMulti
+                        key={fieldID}
+                        selectedKeys={field.value}
+                        options={field.options}
                     />
                 });
                 break;
