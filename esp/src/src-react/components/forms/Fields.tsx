@@ -140,24 +140,54 @@ const AsyncDropdown: React.FunctionComponent<AsyncDropdownProps> = ({
 };
 
 interface DropdownMultiProps {
-    selectedKeys?: string[];
+    label?: string;
     options?: IDropdownOption[];
+    selectedKeys?: string;
+    defaultSelectedKeys?: string;
+    required?: boolean;
+    optional?: boolean;
+    disabled?: boolean;
+    errorMessage?: string;
+    onChange?: (event: React.FormEvent<HTMLDivElement>, value?: string) => void;
+    placeholder?: string;
+    className?: string
 }
 
-export const DropdownMulti: React.FunctionComponent<DropdownMultiProps> = ({
-    selectedKeys = [],
-    options = []
+const DropdownMulti: React.FunctionComponent<DropdownMultiProps> = ({
+    label,
+    options = [],
+    selectedKeys,
+    defaultSelectedKeys,
+    required = false,
+    optional = !required,
+    disabled,
+    errorMessage,
+    onChange,
+    placeholder,
+    className
 }) => {
-    const [selectedItems, setSelectedItems] = React.useState<string[]>(selectedKeys);
-
-    const onChange = (event: React.FormEvent<HTMLDivElement>, item: IDropdownOption): void => {
-        if (item) {
-            const selected = item.selected ? [...selectedItems, item.key as string] : selectedItems.filter(key => key !== item.key);
-            setSelectedItems(selected);
+    const defaultSelKeys = React.useMemo(() => {
+        if (defaultSelectedKeys) {
+            return defaultSelectedKeys.split(",");
         }
-    };
+        return [];
+    }, [defaultSelectedKeys]);
 
-    return <DropdownBase options={options} multiSelect={true} selectedKeys={selectedItems} onChange={onChange} />;
+    const selKeys = React.useMemo(() => {
+        if (selectedKeys) {
+            return selectedKeys.split(",");
+        }
+        return [];
+    }, [selectedKeys]);
+
+    const localOnChange = React.useCallback((event: React.FormEvent<HTMLDivElement>, item: IDropdownOption): void => {
+        if (item) {
+            const selected = item.selected ? [...selKeys, item.key as string] : selKeys.filter(key => key !== item.key);
+            onChange(event, selected.join(","));
+        }
+    }, [onChange, selKeys]);
+
+    return <DropdownBase label={label} errorMessage={errorMessage} required={required} multiSelect selectedKeys={selKeys} defaultSelectedKeys={defaultSelKeys} onChange={localOnChange} placeholder={placeholder} options={options} disabled={disabled} className={className} />;
 };
 
 export type FieldType = "string" | "password" | "number" | "checkbox" | "choicegroup" | "datetime" | "dropdown" | "dropdown-multi" |
@@ -219,7 +249,7 @@ interface DropdownField extends BaseField {
 
 interface DropdownMultiField extends BaseField {
     type: "dropdown-multi";
-    value?: string[];
+    value?: string;
     options: IDropdownOption[];
 }
 
@@ -807,6 +837,8 @@ export function createInputs(fields: Fields, onChange?: (id: string, newValue: a
                         key={fieldID}
                         selectedKeys={field.value}
                         options={field.options}
+                        onChange={(ev, value) => onChange(fieldID, value)}
+                        placeholder={field.placeholder}
                     />
                 });
                 break;

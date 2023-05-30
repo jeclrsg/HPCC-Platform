@@ -49,6 +49,9 @@ function formatQuery(_request: any): Partial<GetLogsExRequest> {
     if (_request.EndDate) {
         request.EndDate = new Date(_request.EndDate);
     }
+    if (_request.class) {
+        request.class = _request.class.split(",");
+    }
     return request;
 }
 
