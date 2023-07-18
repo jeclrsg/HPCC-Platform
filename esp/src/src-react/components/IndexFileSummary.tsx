@@ -186,8 +186,8 @@ export const IndexFileSummary: React.FunctionComponent<IndexFileSummaryProps> = 
                 "RecordCount": { label: nlsHPCC.RecordCount, type: "string", value: file?.RecordCount, readonly: true },
                 "IsReplicated": { label: nlsHPCC.IsReplicated, type: "checkbox", value: (file?.filePartsOnCluster() ?? []).length > 0, readonly: true },
                 "NumParts": { label: nlsHPCC.FileParts, type: "number", value: file?.NumParts, readonly: true },
-                "MinSkew": { label: nlsHPCC.MinSkew, type: "string", value: file?.Stat?.MinSkew, readonly: true },
-                "MaxSkew": { label: nlsHPCC.MaxSkew, type: "string", value: file?.Stat?.MaxSkew, readonly: true },
+                "MinSkew": { label: nlsHPCC.MinSkew, type: "string", value: `${file?.Stat?.MinSkew ?? 0.00}%`, readonly: true },
+                "MaxSkew": { label: nlsHPCC.MaxSkew, type: "string", value: `${file?.Stat?.MaxSkew ?? 0.00}%`, readonly: true },
                 "MinSkewPart": { label: nlsHPCC.MinSkewPart, type: "string", value: file?.Stat?.MinSkewPart === undefined ? "" : file?.Stat?.MinSkewPart?.toString(), readonly: true },
                 "MaxSkewPart": { label: nlsHPCC.MaxSkewPart, type: "string", value: file?.Stat?.MaxSkewPart === undefined ? "" : file?.Stat?.MaxSkewPart?.toString(), readonly: true },
             }} onChange={(id, value) => {

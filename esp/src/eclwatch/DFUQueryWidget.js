@@ -737,11 +737,7 @@ define([
                         label: nlsHPCC.MinSkew, width: 60,
                         formatter: function (value, row) {
                             if (value !== undefined && value !== null) {
-                                if (value.toString().indexOf(".") >= 0) {
-                                    return Math.abs(value) + "%";
-                                } else {
-                                    return Utility.formatDecimal(value / 100) + "%";
-                                }
+                                return value + "%";
                             }
                             return "";
                         }
@@ -750,11 +746,7 @@ define([
                         label: nlsHPCC.MaxSkew, width: 60,
                         formatter: function (value, row) {
                             if (value !== undefined && value !== null) {
-                                if (value.toString().indexOf(".") >= 0) {
-                                    return value + "%";
-                                } else {
-                                    return Utility.formatDecimal(value / 100) + "%";
-                                }
+                                return value + "%";
                             }
                             return "";
                         }
