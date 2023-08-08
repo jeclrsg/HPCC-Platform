@@ -918,6 +918,8 @@ export = {
         SuspendedReason: "Suspended Reason",
         Statistics: "Statistics",
         SVGSource: "SVG Source",
+        SwitchToLocalTime:"Switch to Local Time",
+        SwitchToUTCTime:"Switch to UTC Time",
         SyncSelection: "Sync To Selection",
         SystemServers: "System Servers",
         tag: "tag",

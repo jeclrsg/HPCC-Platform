@@ -1211,7 +1211,17 @@ export function isSpill(sourceKind: string, targetKind: string): boolean {
     return sourceKind === "2" || targetKind === "71";
 }
 
-export function wuidToDate(wuid: string): string {
+export function convertToLocalTime(dateString) {
+    const modifiedDate = new Date(dateString);
+    return modifiedDate.toLocaleString();
+  }
+  
+  export function convertToUTCTime(dateString) {
+    const modifiedDate = new Date(dateString);
+    return modifiedDate.toUTCString();
+  }
+  
+  export function wuidToDate(wuid: string): string {
     return `${wuid.substring(1, 5)}-${wuid.substring(5, 7)}-${wuid.substring(7, 9)}`;
 }
 
