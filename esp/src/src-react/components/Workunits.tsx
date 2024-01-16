@@ -14,6 +14,7 @@ import { HolyGrail } from "../layouts/HolyGrail";
 import { FluentPagedGrid, FluentPagedFooter, useCopyButtons, useFluentStoreState, FluentColumns } from "./controls/Grid";
 import { Fields } from "./forms/Fields";
 import { Filter } from "./forms/Filter";
+import { ZAPImport } from "./forms/ZAPImport";
 import { ShortVerticalDivider } from "./Common";
 import { QuerySortItem } from "src/store/Store";
 
@@ -92,6 +93,7 @@ export const Workunits: React.FunctionComponent<WorkunitsProps> = ({
     const hasFilter = React.useMemo(() => Object.keys(filter).length > 0, [filter]);
 
     const [showFilter, setShowFilter] = React.useState(false);
+    const [showZapImport, setShowZapImport] = React.useState(false);
     const { currentUser } = useMyAccount();
     const [uiState, setUIState] = React.useState({ ...defaultUIState });
     const {
@@ -275,7 +277,12 @@ export const Workunits: React.FunctionComponent<WorkunitsProps> = ({
                 pushParams(filter);
             }
         },
-    ], [currentUser, filter, hasFilter, refreshTable, selection, setShowAbortConfirm, setShowDeleteConfirm, store, total, uiState.hasNotCompleted, uiState.hasNotProtected, uiState.hasProtected, uiState.hasSelection]);
+        { key: "divider_5", itemType: ContextualMenuItemType.Divider, onRender: () => <ShortVerticalDivider /> },
+        {
+            key: "zapImport", text: nlsHPCC.Import, disabled: !!store,
+            onClick: () => { setShowZapImport(true); }
+        },
+    ], [currentUser, filter, hasFilter, refreshTable, selection, setShowAbortConfirm, setShowDeleteConfirm, setShowZapImport, store, total, uiState.hasNotCompleted, uiState.hasNotProtected, uiState.hasProtected, uiState.hasSelection]);
 
     //  Selection  ---
     React.useEffect(() => {
@@ -330,6 +337,7 @@ export const Workunits: React.FunctionComponent<WorkunitsProps> = ({
                     </div>
                 }</SizeMe>
                 <Filter showFilter={showFilter} setShowFilter={setShowFilter} filterFields={filterFields} onApply={pushParams} />
+                <ZAPImport showForm={showZapImport} setShowForm={setShowZapImport} />
                 <DeleteConfirm />
                 <AbortConfirm />
             </>
