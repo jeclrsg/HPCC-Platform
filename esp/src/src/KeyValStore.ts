@@ -212,7 +212,7 @@ class CookieStorage implements IKeyValStore {
     set(key: string, value: string, broadcast?: boolean): Promise<void> {
         const cookies = Utility.parseCookies();
         const oldValue = cookies[key];
-        document.cookie = `${key}=${value};path=/`;
+        document.cookie = `${key}=${value}`;
         return Promise.resolve().then(() => {
             if (broadcast) {
                 this._dispatch.post(new ValueChangedMessage(key, value, oldValue));
