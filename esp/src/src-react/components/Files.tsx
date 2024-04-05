@@ -80,7 +80,7 @@ function formatQuery(_filter): { [id: string]: any } {
 
 const defaultUIState = {
     hasSelection: false,
-    isUTC: false, 
+    isUTC: false,
 };
 
 interface FilesProps {
@@ -111,6 +111,7 @@ export const Files: React.FunctionComponent<FilesProps> = ({
     const { currentUser } = useMyAccount();
     const [viewByScope, setViewByScope] = React.useState(false);
     const [uiState, setUIState] = React.useState({ ...defaultUIState });
+    const [useUTC, setUseUTC] = React.useState(false);
     const {
         selection, setSelection,
         pageNum, setPageNum,
@@ -130,23 +131,46 @@ export const Files: React.FunctionComponent<FilesProps> = ({
 
     const toggleTimezone = () => {
         setUIState((prevState) => ({ ...prevState, isUTC: !prevState.isUTC }));
-      };
-    
-      React.useEffect(() => {
-        localStorage.setItem("isUTC", JSON.stringify(uiState.isUTC));
-      }, [uiState.isUTC]);
-    
-      React.useEffect(() => {
+    };
+
+    React.useEffect(() => {
+        const isUTC = JSON.stringify(uiState.isUTC);
+        localStorage.setItem("isUTC", isUTC);
+        setUseUTC(isUTC === "true");
+    }, [uiState.isUTC]);
+
+    React.useEffect(() => {
         const storedIsUTC = JSON.parse(localStorage.getItem("isUTC"));
         if (storedIsUTC !== null) {
-          setUIState((prevState) => ({ ...prevState, isUTC: storedIsUTC }));
+            setUIState((prevState) => ({ ...prevState, isUTC: storedIsUTC }));
         }
-      }, []);
-    
-      const currentTime = React.useCallback(timestamp => {
-        const date = new Date(timestamp);
-        return date.toUTCString();
     }, []);
+
+    const currentTime = React.useCallback(timestamp => {
+        const date = new Date(timestamp);
+        const options: Intl.DateTimeFormatOptions = {
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: false,
+            timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        };
+        if (useUTC) {
+            options.timeZone = "UTC"
+        }
+        const parts = new Intl.DateTimeFormat("en-US", options).formatToParts(date);
+        const formattedDate = parts.filter(p => p.type === "year")[0].value + "-" +
+            parts.filter(p => p.type === "month")[0].value + "-" +
+            parts.filter(p => p.type === "day")[0].value + " " +
+            parts.filter(p => p.type === "hour")[0].value + ":" +
+            parts.filter(p => p.type === "minute")[0].value + ":" +
+            parts.filter(p => p.type === "second")[0].value;
+        return formattedDate;
+    }, [useUTC]);
+
     //  Grid ---
     const gridStore = React.useMemo(() => {
         return store ? store : CreateDFUQueryStore();
@@ -230,9 +254,9 @@ export const Files: React.FunctionComponent<FilesProps> = ({
             MaxSkew: {
                 label: nlsHPCC.MaxSkew, width: 60, formatter: (value, row) => value ? `${Utility.formatDecimal(value / 100)}%` : ""
             },
-            Modified: { label: nlsHPCC.ModifiedUTCGMT, formatter: currentTime },
-			Accessed: { label: nlsHPCC.LastAccessed },
- 			AtRestCost: {
+            Modified: { label: useUTC ? nlsHPCC.ModifiedUTCGMT : nlsHPCC.Modified, formatter: currentTime },
+            Accessed: { label: nlsHPCC.LastAccessed },
+            AtRestCost: {
                 label: nlsHPCC.FileCostAtRest,
                 formatter: (cost, row) => {
                     return `${formatCost(cost)}`;
@@ -245,7 +269,7 @@ export const Files: React.FunctionComponent<FilesProps> = ({
                 },
             }
         };
-    }, []);
+    }, [currentTime]);
 
     const copyButtons = useCopyButtons(columns, selection, "files");
 
@@ -341,7 +365,7 @@ export const Files: React.FunctionComponent<FilesProps> = ({
             text: uiState.isUTC ? nlsHPCC.SwitchToLocalTime : nlsHPCC.SwitchToUTCTime,
             iconProps: { iconName: uiState.isUTC ? "Globe" : "Clock" },
             onClick: toggleTimezone,
-          },
+        },
     ], [currentUser, filter, hasFilter, refreshTable, selection, setShowDeleteConfirm, store, total, uiState.hasSelection, uiState.isUTC, viewByScope]);
 
     //  Filter  ---
