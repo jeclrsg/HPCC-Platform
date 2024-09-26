@@ -41,6 +41,7 @@
     "@fluentui/react-hooks": "8.8.10",
     "@fluentui/react-icons-mdl2": "1.3.72",
     "@fluentui/react-migration-v8-v9": "9.6.22",
+    "@fluentui/react-nav-preview": "0.8.1",
     "@hpcc-js/chart": "2.84.1",
     "@hpcc-js/codemirror": "2.63.0",
     "@hpcc-js/common": "2.72.0",

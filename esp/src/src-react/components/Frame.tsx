@@ -8,7 +8,7 @@ import { HolyGrail } from "../layouts/HolyGrail";
 import { hashHistory } from "../util/history";
 import { router } from "../routes";
 import { DevTitle } from "./Title";
-import { MainNavigation, SubNavigation } from "./Menu";
+import { SubNavigation } from "./Menu";
 import { CookieConsent } from "./forms/CookieConsent";
 import { userKeyValStore } from "src/KeyValStore";
 import { fireIdle, initSession, lock, unlock } from "src/Session";
@@ -110,8 +110,7 @@ export const Frame: React.FunctionComponent<FrameProps> = () => {
     return <FluentProvider theme={themeV9} style={{ height: "100%" }}>
         <ThemeProvider theme={theme} style={{ height: "100%" }}>
             <HolyGrail
-                header={<DevTitle />}
-                left={<MainNavigation hashPath={locationPathname} />}
+                header={<DevTitle hashPath={locationPathname} />}
                 main={<HolyGrail
                     header={<SubNavigation hashPath={locationPathname} />}
                     main={body}

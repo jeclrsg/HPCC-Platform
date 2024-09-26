@@ -415,7 +415,7 @@ export const routes: RoutesEx = [
         path: "/operations",
         children: [
             {
-                path: "", action: () => import("./layouts/DojoAdapter").then(_ => {
+                path: "/topology", action: () => import("./layouts/DojoAdapter").then(_ => {
                     return <_.DojoAdapter widgetClassID="TopologyWidget" />;
                 })
             },

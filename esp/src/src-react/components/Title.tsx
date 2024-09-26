@@ -19,12 +19,13 @@ import { PasswordStatus, useMyAccount, useUserSession } from "../hooks/user";
 
 import { TitlebarConfig } from "./forms/TitlebarConfig";
 import { switchTechPreview } from "./controls/ComingSoon";
+import { AppPanel } from "./AppPanel";
 import { About } from "./About";
+import { NavigationDrawer } from "./Menu";
 import { MyAccount } from "./MyAccount";
 import { toasterScale } from "./controls/CustomToaster";
 
 const logger = scopedLogger("src-react/components/Title.tsx");
-import { AppPanel } from "./AppPanel";
 
 const collapseMenuIcon: IIconProps = { iconName: "CollapseMenu" };
 
@@ -41,9 +42,11 @@ const personaStyles = {
 const DAY = 1000 * 60 * 60 * 24;
 
 interface DevTitleProps {
+    hashPath: string;
 }
 
 export const DevTitle: React.FunctionComponent<DevTitleProps> = ({
+    hashPath
 }) => {
 
     const [, { opsCategory }] = useBuildInfo();
@@ -269,14 +272,19 @@ export const DevTitle: React.FunctionComponent<DevTitleProps> = ({
         }
     }, [currentUser, setPasswordExpiredConfirm]);
 
-    return <div style={{ backgroundColor: titlebarColorSet ? titlebarColor : theme.palette.themeLight }}>
+    return <div style={{ backgroundColor: titlebarColorSet ? titlebarColor : theme.palette.themeLight, paddingTop: 6, paddingBottom: 6 }}>
         <BannerMessageBar />
         <Stack horizontal verticalAlign="center" horizontalAlign="space-between">
             <Stack.Item align="center">
                 <Stack horizontal>
                     <Stack.Item>
+                        <NavigationDrawer hashPath={hashPath} />
+                    </Stack.Item>
+                    {/*
+                    <Stack.Item>
                         <IconButton iconProps={waffleIcon} onClick={openAppPanel} style={{ width: 48, height: 48, color: titlebarColorSet ? Utility.textColor(titlebarColor) : theme.palette.themeDarker }} />
                     </Stack.Item>
+                    */}
                     <Stack.Item align="center">
                         <Link href="#/activities">
                             <Text variant="large" nowrap block >

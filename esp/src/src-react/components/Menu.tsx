@@ -1,5 +1,8 @@
 import * as React from "react";
 import { IconButton, IContextualMenuItem, INavLink, INavLinkGroup, Link, mergeStyleSets, Nav, Stack } from "@fluentui/react";
+import { Tooltip } from "@fluentui/react-components";
+import { Connected20Filled, Connected20Regular, DocumentDatabase20Filled, DocumentDatabase20Regular, Globe20Filled, Globe20Regular, Home20Filled, Home20Regular, ShieldBadge20Filled, ShieldBadge20Regular, TextColumnOneWideLightning20Filled, TextColumnOneWideLightning20Regular, bundleIcon } from "@fluentui/react-icons";
+import { Hamburger, NavCategory, NavCategoryItem, NavDrawer, NavDrawerBody, NavDrawerHeader, NavItem, NavSubItemGroup, NavSubItem } from "@fluentui/react-nav-preview";
 import { useConst } from "@fluentui/react-hooks";
 import nlsHPCC from "src/nlsHPCC";
 import { hasLogAccess } from "src/ESPLog";
@@ -11,6 +14,13 @@ import { useSessionStore } from "../hooks/store";
 import { useUserTheme } from "../hooks/theme";
 import { useMyAccount } from "../hooks/user";
 import { Breadcrumbs } from "./Breadcrumbs";
+
+const ActivitiesIcon = bundleIcon(Home20Filled, Home20Regular);
+const WorkunitsIcon = bundleIcon(TextColumnOneWideLightning20Filled, TextColumnOneWideLightning20Regular);
+const FilesIcon = bundleIcon(DocumentDatabase20Filled, DocumentDatabase20Regular);
+const QueriesIcon = bundleIcon(Globe20Filled, Globe20Regular);
+const TopologyIcon = bundleIcon(Connected20Filled, Connected20Regular);
+const OperationsIcon = bundleIcon(ShieldBadge20Filled, ShieldBadge20Regular);
 
 export interface NextPrevious {
     next: () => void;
@@ -142,6 +152,136 @@ export const MainNavigation: React.FunctionComponent<MainNavigationProps> = ({
             {/* <IconButton iconProps={{ iconName: "Equalizer" }} onClick={() => { }} /> */}
         </Stack.Item>
     </Stack>;
+};
+
+const navDrawerItems = [
+    { value: "1", hash: "/activities" },
+    { value: "3", hash: "/workunits" },
+    { value: "4", hash: "/play" },
+    { value: "6", hash: "/files" },
+    { value: "7", hash: "/landingzone" },
+    { value: "8", hash: "/dfuworkunits" },
+    { value: "9", hash: "/xref" },
+    { value: "11", hash: "/queries" },
+    { value: "12", hash: "/packagemaps" },
+    { value: "14", hash: "/topology/configuration" },
+    { value: "15", hash: "/topology/pods" },
+    { value: "16", hash: "/topology/services" },
+    { value: "17", hash: "/topology/logs" },
+    { value: "18", hash: "/topology/security" },
+    { value: "19", hash: "/topology/desdl" },
+    { value: "20", hash: "/topology/daliadmin" },
+    // { value: "21", hash: "/topology/sasha" },
+    { value: "23", hash: "/operations/topology" },
+    { value: "24", hash: "/operations/diskusage" },
+    { value: "25", hash: "/operations/clusters" },
+    { value: "26", hash: "/operations/processes" },
+    { value: "27", hash: "/operations/servers" },
+    { value: "28", hash: "/operations/security" },
+    { value: "29", hash: "/operations/desdl" },
+];
+
+export const NavigationDrawer: React.FunctionComponent<MainNavigationProps> = ({
+    hashPath
+}) => {
+
+    const [isOpen, setIsOpen] = React.useState(false);
+    const [selectedItem, setSelectedItem] = React.useState("");
+
+    React.useEffect(() => {
+        setSelectedItem(navDrawerItems?.find(i => hashPath.indexOf(i.hash) > -1)?.value ?? "");
+    }, [hashPath]);
+
+    // bit of a hack, but this <NavDrawer> component doesn't provide for closing it
+    // when clicking outside, which seems like something people are going to do
+    React.useEffect(() => {
+        const handleOverlayClick = () => setIsOpen(false);
+        const addListener = () => {
+            const drawerOverlay = document.querySelector(".fui-OverlayDrawer__backdrop");
+            drawerOverlay?.addEventListener("click", handleOverlayClick);
+        };
+
+        const mutationObserver = new MutationObserver(() => { addListener(); });
+        mutationObserver.observe(document.body, { childList: true, subtree: true });
+
+        return () => {
+            const drawerOverlay = document.querySelector(".fui-OverlayDrawer__backdrop");
+            drawerOverlay.removeEventListener("click", handleOverlayClick);
+            mutationObserver.disconnect();
+        }
+    }, []);
+
+    const renderHamburgerWithToolTip = () => {
+        return (
+            <Tooltip content="Navigation" relationship="label">
+                <Hamburger onClick={() => setIsOpen(!isOpen)} />
+            </Tooltip>
+        );
+    };
+
+    return <div>
+        {!isOpen && renderHamburgerWithToolTip()}
+        <NavDrawer open={isOpen} multiple={true} selectedValue={selectedItem} onNavItemSelect={() => setIsOpen(false)}>
+            <NavDrawerHeader>
+                <Hamburger onClick={() => setIsOpen(!isOpen)} />
+            </NavDrawerHeader>
+            <NavDrawerBody>
+                <NavItem href={"#/activities"} icon={<ActivitiesIcon />} value="1">{nlsHPCC.Activities}</NavItem>
+                <NavCategory value="2">
+                    <NavCategoryItem icon={<WorkunitsIcon />}>{nlsHPCC.ECL}</NavCategoryItem>
+                    <NavSubItemGroup>
+                        <NavSubItem href={"#/workunits"} value="3">{nlsHPCC.Workunits}</NavSubItem>
+                        <NavSubItem href={"#/play"} value="4">{nlsHPCC.Playground}</NavSubItem>
+                    </NavSubItemGroup>
+                </NavCategory>
+                <NavCategory value="5">
+                    <NavCategoryItem icon={<FilesIcon />}>{nlsHPCC.Files}</NavCategoryItem>
+                    <NavSubItemGroup>
+                        <NavSubItem href={"#/files"} value="6">{nlsHPCC.LogicalFiles}</NavSubItem>
+                        <NavSubItem href={"#/landingzone"} value="7">{nlsHPCC.LandingZones}</NavSubItem>
+                        <NavSubItem href={"#/dfuworkunits"} value="8">{nlsHPCC.title_GetDFUWorkunits}</NavSubItem>
+                        <NavSubItem href={"#/xref"} value="9">{`${nlsHPCC.XRef} (L)`}</NavSubItem>
+                    </NavSubItemGroup>
+                </NavCategory>
+                <NavCategory value="10">
+                    <NavCategoryItem icon={<QueriesIcon />}>{nlsHPCC.PublishedQueries}</NavCategoryItem>
+                    <NavSubItemGroup>
+                        <NavSubItem href={"#/queries"} value="11">{nlsHPCC.Queries}</NavSubItem>
+                        <NavSubItem href={"#/packagemaps"} value="12">{nlsHPCC.PackageMaps}</NavSubItem>
+                    </NavSubItemGroup>
+                </NavCategory>
+                {containerized &&
+                    <NavCategory value="13">
+                        <NavCategoryItem icon={<TopologyIcon />}>{nlsHPCC.Topology}</NavCategoryItem>
+                        <NavSubItemGroup>
+                            <NavSubItem href={"#/topology/configuration"} value="14">{nlsHPCC.Configuration}</NavSubItem>
+                            <NavSubItem href={"#/topology/pods"} value="15">{nlsHPCC.Pods}</NavSubItem>
+                            <NavSubItem href={"#/topology/services"} value="16">{nlsHPCC.Services}</NavSubItem>
+                            <NavSubItem href={"#/topology/logs"} value="17">{nlsHPCC.Logs}</NavSubItem>
+                            <NavSubItem href={"#/topology/security"} value="18">{`${nlsHPCC.Security} (L)`}</NavSubItem>
+                            <NavSubItem href={"#/topology/desdl"} value="19">{`${nlsHPCC.DESDL} (L)`}</NavSubItem>
+                            <NavSubItem href={"#/topology/daliadmin"} value="20">{nlsHPCC.DaliAdmin}</NavSubItem>
+                            {/* <NavSubItem href={"#/topology/sasha"} value="21">{nlsHPCC.Sasha}</NavSubItem> */}
+                        </NavSubItemGroup>
+                    </NavCategory>
+                }
+                {bare_metal &&
+                    <NavCategory value="22">
+                        <NavCategoryItem icon={<OperationsIcon />}>{nlsHPCC.Operations}</NavCategoryItem>
+                        <NavSubItemGroup>
+                            <NavSubItem href={"#/operations/topology"} value="23">{`${nlsHPCC.Topology} (L)`}</NavSubItem>
+                            <NavSubItem href={"#/operations/diskusage"} value="24">{`${nlsHPCC.DiskUsage} (L)`}</NavSubItem>
+                            <NavSubItem href={"#/operations/clusters"} value="25">{`${nlsHPCC.title_Clusters} (L)`}</NavSubItem>
+                            <NavSubItem href={"#/operations/processes"} value="26">{`${nlsHPCC.Processes} (L)`}</NavSubItem>
+                            <NavSubItem href={"#/operations/servers"} value="27">{`${nlsHPCC.title_SystemServers} (L)`}</NavSubItem>
+                            <NavSubItem href={"#/operations/security"} value="28">{`${nlsHPCC.Security} (L)`}</NavSubItem>
+                            <NavSubItem href={"#/operations/desdl"} value="29">{`${nlsHPCC.DESDL} (L)`}</NavSubItem>
+                        </NavSubItemGroup>
+                    </NavCategory>
+                }
+            </NavDrawerBody>
+        </NavDrawer>
+    </div>;
 };
 
 //  Second Level Nav  ---
