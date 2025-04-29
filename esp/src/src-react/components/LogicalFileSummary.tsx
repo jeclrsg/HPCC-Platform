@@ -19,7 +19,6 @@ import { replaceUrl } from "../util/history";
 const logger = scopedLogger("src-react/components/LogicalFileSummary.tsx");
 
 import "react-reflex/styles.css";
-
 const dfuService = new DFUService({ baseUrl: "" });
 
 interface LogicalFileSummaryProps {
@@ -126,6 +125,29 @@ export const LogicalFileSummary: React.FunctionComponent<LogicalFileSummaryProps
         },
         { key: "divider_2", itemType: ContextualMenuItemType.Divider, onRender: () => <ShortVerticalDivider /> },
         {
+            key: "protect", text: nlsHPCC.Protect, iconProps: { iconName: "Lock" }, disabled: _protected,
+            onClick: () => {
+                file?.update({ Protect: WsDfu.DFUChangeProtection.Protect })
+                    .then(() => {
+                        setProtected(true);
+                        refresh();
+                    })
+                    .catch(err => logger.error(err));
+            }
+        },
+        {
+            key: "unprotect", text: nlsHPCC.Unprotect, iconProps: { iconName: "Unlock" }, disabled: !_protected,
+            onClick: () => {
+                file?.update({ Protect: WsDfu.DFUChangeProtection.Unprotect })
+                    .then(() => {
+                        setProtected(false);
+                        refresh();
+                    })
+                    .catch(err => logger.error(err));
+            }
+        },
+        { key: "divider_3", itemType: ContextualMenuItemType.Divider, onRender: () => <ShortVerticalDivider /> },
+        {
             key: "copyFile", text: nlsHPCC.Copy, disabled: !file,
             onClick: () => setShowCopyFile(true)
         },
@@ -137,12 +159,12 @@ export const LogicalFileSummary: React.FunctionComponent<LogicalFileSummaryProps
             key: "despray", text: nlsHPCC.Despray, disabled: !file,
             onClick: () => setShowDesprayFile(true)
         },
-        { key: "divider_3", itemType: ContextualMenuItemType.Divider, onRender: () => <ShortVerticalDivider /> },
+        { key: "divider_4", itemType: ContextualMenuItemType.Divider, onRender: () => <ShortVerticalDivider /> },
         {
             key: "replicate", text: nlsHPCC.Replicate, disabled: !canReplicateFlag || !replicateFlag,
             onClick: () => setShowReplicateFile(true)
         },
-    ], [canReplicateFlag, canSave, description, file, logicalFile, refreshData, replicateFlag, setShowDeleteConfirm]);
+    ], [canReplicateFlag, canSave, description, file, logicalFile, _protected, refreshData, replicateFlag, setShowDeleteConfirm]);
 
     const protectedImage = _protected ? Utility.getImageURL("locked.png") : Utility.getImageURL("unlocked.png");
     const stateImage = Utility.getImageURL(getStateImageName(file as unknown as IFile));
@@ -181,7 +203,7 @@ export const LogicalFileSummary: React.FunctionComponent<LogicalFileSummaryProps
                 "JobName": { label: nlsHPCC.JobName, type: "string", value: file?.JobName, readonly: true },
                 "AccessCost": { label: nlsHPCC.FileAccessCost, type: "string", value: `${formatCost(file?.AccessCost)}`, readonly: true },
                 "AtRestCost": { label: nlsHPCC.FileCostAtRest, type: "string", value: `${formatCost(file?.AtRestCost)}`, readonly: true },
-                "isProtected": { label: nlsHPCC.Protected, type: "checkbox", value: _protected },
+                "countProtectedUsers": { label: nlsHPCC.ProtectedByMultipleUsers, type: "string", value: protectedBy.length.toString(), readonly: true },
                 "isRestricted": { label: nlsHPCC.Restricted, type: "checkbox", value: restricted },
                 "ContentType": { label: nlsHPCC.ContentType, type: "string", value: file?.ContentType, readonly: true },
                 "KeyType": { label: nlsHPCC.KeyType, type: "string", value: file?.KeyType, readonly: true },
@@ -212,6 +234,8 @@ export const LogicalFileSummary: React.FunctionComponent<LogicalFileSummaryProps
                         setProtected(value);
                         file?.update({
                             Protect: value ? WsDfu.DFUChangeProtection.Protect : WsDfu.DFUChangeProtection.Unprotect,
+                        }).then(() => {
+                            refreshData();
                         }).catch(err => logger.error(err));
                         break;
                     case "isRestricted":
