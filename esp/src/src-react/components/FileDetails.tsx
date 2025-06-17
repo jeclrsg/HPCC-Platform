@@ -102,7 +102,7 @@ export const FileDetails: React.FunctionComponent<FileDetailsProps> = ({
             label: nlsHPCC.ProtectBy,
             count: file?.ProtectList?.DFUFileProtect?.length ?? 0
         }];
-    }, [file]);
+    }, [file, file?.ProtectList?.DFUFileProtect]);
 
     return <FullscreenFrame fullscreen={fullscreen}>
         <SizeMe>{({ size }) =>

@@ -20,9 +20,9 @@ export const ProtectedBy: React.FunctionComponent<ProtectedByProps> = ({
     sort = defaultSort
 }) => {
 
-    const { file, refreshData } = useFile(cluster, logicalFile);
+    const { protectedBy, refreshData } = useFile(cluster, logicalFile);
     const [data, setData] = React.useState<any[]>([]);
-    const { selection, setSelection, total, setTotal, refreshTable } = useFluentStoreState({});
+    const { selection, setSelection, setTotal, refreshTable } = useFluentStoreState({});
 
     const columns = React.useMemo((): FluentColumns => ({
         Owner: { label: nlsHPCC.Owner, width: 320 },
@@ -30,44 +30,36 @@ export const ProtectedBy: React.FunctionComponent<ProtectedByProps> = ({
     }), []);
 
     React.useEffect(() => {
-        const protects = file?.ProtectList?.DFUFileProtect;
-        if (protects) {
-            const rows = protects.map(({ Owner, Modified }) => ({ Owner, Modified }));
-            setData(rows);
-            // Count distinct owners
-            const distinctCount = new Set(rows.map(r => r.Owner)).size;
-            setTotal(distinctCount);
-        }
-    }, [file?.ProtectList?.DFUFileProtect, setTotal]);
+        setData(protectedBy?.map(row => {
+            return {
+                Owner: row.Owner,
+                Modified: row.Modified
+            };
+        }));
+    }, [protectedBy]);
 
-    const buttons = React.useMemo<ICommandBarItemProps[]>(
-        () => [
-            {
-                key: "refresh",
-                text: `${nlsHPCC.Refresh} (${nlsHPCC.Users}: ${total})`,
-                iconProps: { iconName: "Refresh" },
-                onClick: () => refreshData()
-            }
-        ],
-        [refreshData, total]
-    );
+    //  Command Bar  ---
+    const buttons = React.useMemo((): ICommandBarItemProps[] => [
+        {
+            key: "refresh", text: nlsHPCC.Refresh, iconProps: { iconName: "Refresh" },
+            onClick: () => refreshData()
+        },
+    ], [refreshData]);
 
     const copyButtons = useCopyButtons(columns, selection, "protectedBy");
 
-    return (
-        <HolyGrail
-            header={<CommandBar items={buttons} farItems={copyButtons} />}
-            main={
-                <FluentGrid
-                    data={data}
-                    primaryID="Owner"
-                    sort={sort}
-                    columns={columns}
-                    setSelection={setSelection}
-                    setTotal={setTotal}
-                    refresh={refreshTable}
-                />
-            }
-        />
-    );
+    return <HolyGrail
+        header={<CommandBar items={buttons} farItems={copyButtons} />}
+        main={
+            <FluentGrid
+                data={data}
+                primaryID="Owner"
+                sort={sort}
+                columns={columns}
+                setSelection={setSelection}
+                setTotal={setTotal}
+                refresh={refreshTable}
+            />
+        }
+    />;
 };

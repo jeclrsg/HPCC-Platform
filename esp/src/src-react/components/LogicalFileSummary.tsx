@@ -33,7 +33,7 @@ export const LogicalFileSummary: React.FunctionComponent<LogicalFileSummaryProps
     tab = "summary"
 }) => {
 
-    const { file, isProtected, refreshData } = useFile(cluster, logicalFile);
+    const { file, isProtected, protectedBy, refreshData } = useFile(cluster, logicalFile);
     const [description, setDescription] = React.useState("");
     const [_protected, setProtected] = React.useState(false);
     const [restricted, setRestricted] = React.useState(false);
@@ -130,7 +130,7 @@ export const LogicalFileSummary: React.FunctionComponent<LogicalFileSummaryProps
                 file?.update({ Protect: WsDfu.DFUChangeProtection.Protect })
                     .then(() => {
                         setProtected(true);
-                        refresh();
+                        refreshData();
                     })
                     .catch(err => logger.error(err));
             }
@@ -141,7 +141,7 @@ export const LogicalFileSummary: React.FunctionComponent<LogicalFileSummaryProps
                 file?.update({ Protect: WsDfu.DFUChangeProtection.Unprotect })
                     .then(() => {
                         setProtected(false);
-                        refresh();
+                        refreshData();
                     })
                     .catch(err => logger.error(err));
             }

@@ -34,7 +34,7 @@ export const IndexFileSummary: React.FunctionComponent<IndexFileSummaryProps> = 
     tab = "summary"
 }) => {
 
-    const { file, isProtected, refreshData } = useFile(cluster, logicalFile);
+    const { file, isProtected, protectedBy, refreshData } = useFile(cluster, logicalFile);
     const [description, setDescription] = React.useState("");
     const [_protected, setProtected] = React.useState(false);
     const [restricted, setRestricted] = React.useState(false);
@@ -44,11 +44,6 @@ export const IndexFileSummary: React.FunctionComponent<IndexFileSummaryProps> = 
     const [showRenameFile, setShowRenameFile] = React.useState(false);
     const [showDesprayFile, setShowDesprayFile] = React.useState(false);
     const [showReplicateFile, setShowReplicateFile] = React.useState(false);
-
-    const protectedUserCount = React.useMemo(() => {
-        const protects = file?.ProtectList?.DFUFileProtect;
-        return new Set(protects?.map(r => r.Owner)).size;
-    }, [file?.ProtectList?.DFUFileProtect]);
 
     const [DeleteConfirm, setShowDeleteConfirm] = useConfirm({
         title: nlsHPCC.Delete,
@@ -125,7 +120,7 @@ export const IndexFileSummary: React.FunctionComponent<IndexFileSummaryProps> = 
                 file?.update({ Protect: WsDfu.DFUChangeProtection.Protect })
                     .then(() => {
                         setProtected(true);
-                        refresh();
+                        refreshData();
                     })
                     .catch(err => logger.error(err));
             }
@@ -136,7 +131,7 @@ export const IndexFileSummary: React.FunctionComponent<IndexFileSummaryProps> = 
                 file?.update({ Protect: WsDfu.DFUChangeProtection.Unprotect })
                     .then(() => {
                         setProtected(false);
-                        refresh();
+                        refreshData();
                     })
                     .catch(err => logger.error(err));
             }
@@ -189,7 +184,7 @@ export const IndexFileSummary: React.FunctionComponent<IndexFileSummaryProps> = 
                 "JobName": { label: nlsHPCC.JobName, type: "string", value: file?.JobName, readonly: true },
                 "AccessCost": { label: nlsHPCC.FileAccessCost, type: "string", value: `${formatCost(file?.AccessCost)}`, readonly: true },
                 "AtRestCost": { label: nlsHPCC.FileCostAtRest, type: "string", value: `${formatCost(file?.AtRestCost)}`, readonly: true },
-                "countProtectedUsers": { label: nlsHPCC.ProtectedByMultipleUsers, type: "string", value: protectedUserCount.toString(), readonly: true },
+                "countProtectedUsers": { label: nlsHPCC.ProtectedByMultipleUsers, type: "string", value: protectedBy?.length?.toString(), readonly: true },
                 "isRestricted": { label: nlsHPCC.Restricted, type: "checkbox", value: restricted },
                 "ContentType": { label: nlsHPCC.ContentType, type: "string", value: file?.ContentType, readonly: true },
                 "KeyType": { label: nlsHPCC.KeyType, type: "string", value: file?.KeyType, readonly: true },
@@ -221,7 +216,7 @@ export const IndexFileSummary: React.FunctionComponent<IndexFileSummaryProps> = 
                         file?.update({
                             Protect: value ? WsDfu.DFUChangeProtection.Protect : WsDfu.DFUChangeProtection.Unprotect,
                         }).then(() => {
-                            refresh();
+                            refreshData();
                         }).catch(err => logger.error(err));
                         break;
                     case "isRestricted":
