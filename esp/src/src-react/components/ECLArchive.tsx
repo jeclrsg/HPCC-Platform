@@ -89,11 +89,13 @@ export const ECLArchive: React.FunctionComponent<ECLArchiveProps> = ({
     React.useEffect(() => {
         if (dockpanel) {
             //  Should only happen once on startup  ---
-            const layout: any = dockpanel.layout();
-            if (Array.isArray(layout?.main?.sizes) && layout.main.sizes.length === 2) {
-                layout.main.sizes = [0.3, 0.7];
-                dockpanel.layout(layout).lazyRender();
-            }
+            window.setTimeout(() => {
+                const layout: any = dockpanel.layout();
+                if (Array.isArray(layout?.main?.sizes) && layout.main.sizes.length === 2) {
+                    layout.main.sizes = [0.3, 0.7];
+                    dockpanel.layout(layout).render();
+                }
+            }, 100);
         }
     }, [dockpanel]);
 

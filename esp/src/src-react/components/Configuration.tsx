@@ -109,7 +109,7 @@ export const Configuration: React.FunctionComponent<ConfigurationProps> = ({
     React.useEffect(() => {
         if (dockpanel) {
             //  Should only happen once on startup  ---
-            const t = window.setTimeout(() => {
+            window.setTimeout(() => {
                 const layout: any = dockpanel.layout();
                 if (Array.isArray(layout?.main?.sizes) && layout.main.sizes.length === 2) {
                     layout.main.sizes = [0.2, 0.8];
@@ -117,7 +117,6 @@ export const Configuration: React.FunctionComponent<ConfigurationProps> = ({
                     // where the hideSingleTabs wasn't repected on initial load
                     dockpanel.layout(layout).render();
                 }
-                window.clearTimeout(t);
             }, 100);
         }
     }, [dockpanel]);

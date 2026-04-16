@@ -1,66 +1,29 @@
 import * as React from "react";
-import { Theme } from "@fluentui/react";
+import { createPortal } from "react-dom";
 import { useConst } from "@fluentui/react-hooks";
-import { Theme as ThemeV9 } from "@fluentui/react-components";
 import { HTMLWidget, Widget, Utility } from "@hpcc-js/common";
 import { DockPanel as HPCCDockPanel, IClosable, WidgetAdapter } from "@hpcc-js/phosphor";
 import { compare2 } from "@hpcc-js/util";
-import { ReactRoot } from "src/react/render";
-import { lightTheme, lightThemeV9 } from "../themes";
-import { useUserTheme } from "../hooks/theme";
 import { AutosizeHpccJSComponent } from "./HpccJSAdapter";
-
-export interface PlaceholderProps {
-    children?: React.ReactNode;
-}
-
-export const Placeholder: React.FunctionComponent<PlaceholderProps> = ({
-    children
-}) => {
-    return <>{children}</>;
-};
 
 export class ReactWidget extends HTMLWidget {
 
-    protected _theme: Theme = lightTheme;
-    protected _themeV9: ThemeV9 = lightThemeV9;
-    protected _children = <div></div>;
-
     protected _div;
-    protected _root: ReactRoot;
+    protected _onDomReady?: (node: HTMLElement) => void;
 
     constructor() {
         super();
     }
 
-    theme(): Theme;
-    theme(_: Theme): this;
-    theme(_?: Theme): this | Theme {
-        if (arguments.length === 0) return this._theme;
-        this._theme = _;
-        return this;
-    }
-
-    themeV9(): ThemeV9;
-    themeV9(_: ThemeV9): this;
-    themeV9(_?: ThemeV9): this | ThemeV9 {
-        if (arguments.length === 0) return this._themeV9;
-        this._themeV9 = _;
-        return this;
-    }
-
-    children(): React.JSX.Element;
-    children(_: React.JSX.Element): this;
-    children(_?: React.JSX.Element): this | React.JSX.Element {
-        if (arguments.length === 0) return this._children;
-        this._children = _;
+    onDomReady(_: (node: HTMLElement) => void): this {
+        this._onDomReady = _;
         return this;
     }
 
     enter(domNode, element) {
         super.enter(domNode, element);
-        this._div = element.append("div");
-        this._root = ReactRoot.create(this._div.node());
+        this._div = element.append("div").style("font-size", "1.15em");
+        this._onDomReady?.(this._div.node());
     }
 
     update(domNode, element) {
@@ -69,11 +32,9 @@ export class ReactWidget extends HTMLWidget {
             .style("width", `${this.width()}px`)
             .style("height", `${this.height()}px`)
             ;
-        this._root?.themedRender(Placeholder, { children: this._children });
     }
 
     exit(domNode, element) {
-        this._root?.dispose();
         super.exit(domNode, element);
     }
 
@@ -207,7 +168,7 @@ export const DockPanel: React.FunctionComponent<DockPanelProps> = ({
         return (Array.isArray(children) ? children : [children]).filter(item => !!item);
     }, [children]);
     const [prevItems, setPrevItems] = React.useState<React.ReactElement<DockPanelItemProps>[]>([]);
-    const { theme, themeV9 } = useUserTheme();
+    const [domNodes, setDomNodes] = React.useState<Map<string, HTMLElement>>(new Map());
     const idx = useConst(() => new Map<string, ReactWidget>());
 
     const dockPanel = useConst(() => {
@@ -232,27 +193,24 @@ export const DockPanel: React.FunctionComponent<DockPanelProps> = ({
         diffs.exit.forEach(item => {
             idx.delete(item.key);
             dockPanel.removeWidget(idx.get(item.key));
+            setDomNodes(prev => {
+                const next = new Map(prev);
+                next.delete(item.key);
+                return next;
+            });
         });
         diffs.enter.forEach(item => {
             const reactWidget = new ReactWidget()
                 .id(item.key)
-                ;
+                .onDomReady((node) => {
+                    setDomNodes(prev => new Map(prev).set(item.key, node));
+                });
             dockPanel.addWidget(reactWidget, item.props.title, item.props.location, idx.get(item.props.relativeTo), item.props.closable, item.props.padding);
             idx.set(item.key, reactWidget);
         });
-        [...diffs.enter, ...diffs.update].forEach(item => {
-            const reactWidget = idx.get(item.key);
-            if (reactWidget) {
-                reactWidget
-                    .theme(theme)
-                    .themeV9(themeV9)
-                    .children(item.props.children)
-                    ;
-            }
-        });
         dockPanel.render();
         setPrevItems(items);
-    }, [prevItems, dockPanel, idx, items, theme, themeV9]);
+    }, [prevItems, dockPanel, idx, items]);
 
     React.useEffect(() => {
         if (layout === undefined) {
@@ -262,5 +220,12 @@ export const DockPanel: React.FunctionComponent<DockPanelProps> = ({
         }
     }, [dockPanel, layout]);
 
-    return <AutosizeHpccJSComponent widget={dockPanel} padding={4} debounce={false} />;
+    return <>
+        <AutosizeHpccJSComponent widget={dockPanel} padding={4} debounce={false} />
+        {items.map(item => {
+            const node = domNodes.get(item.key);
+            if (!node) return null;
+            return createPortal(item.props.children, node, item.key);
+        })}
+    </>;
 };

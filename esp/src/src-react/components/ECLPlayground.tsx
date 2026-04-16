@@ -1,5 +1,4 @@
 import * as React from "react";
-import { createPortal } from "react-dom";
 import { Button, Dropdown, Field, Input, Label, Link, makeStyles, mergeClasses, Option, Spinner } from "@fluentui/react-components";
 import { useOnEvent } from "@fluentui/react-hooks";
 import { CheckmarkCircleRegular, DataBarVerticalFilled, DismissCircleRegular, QuestionCircleRegular, TableRegular, WarningRegular } from "@fluentui/react-icons";
@@ -362,7 +361,6 @@ export const ECLPlayground: React.FunctionComponent<ECLPlaygroundProps> = (props
     const [syntaxErrors, setSyntaxErrors] = React.useState<any[]>([]);
     const [syntaxStatusIcon, setSyntaxStatusIcon] = React.useState(SyntaxCheckResult.Unknown);
     const [eclSamples, setEclSamples] = React.useState<{ key: string, text: string }[]>([]);
-    const [toolbarContainer, setToolbarContainer] = React.useState<HTMLElement | null>(null);
 
     React.useEffect(() => {
         if (wuid) {
@@ -414,11 +412,13 @@ export const ECLPlayground: React.FunctionComponent<ECLPlaygroundProps> = (props
     React.useEffect(() => {
         if (dockpanel) {
             //  Should only happen once on startup  ---
-            const layout: any = dockpanel.layout();
-            if (Array.isArray(layout?.main?.sizes) && layout.main.sizes.length === 2) {
-                layout.main.sizes = [0.7, 0.3];
-                dockpanel.layout(layout).lazyRender();
-            }
+            window.setTimeout(() => {
+                const layout: any = dockpanel.layout();
+                if (Array.isArray(layout?.main?.sizes) && layout.main.sizes.length === 2) {
+                    layout.main.sizes = [0.7, 0.3];
+                    dockpanel.layout(layout).render();
+                }
+            }, 100);
         }
     }, [dockpanel]);
 
@@ -476,7 +476,12 @@ export const ECLPlayground: React.FunctionComponent<ECLPlaygroundProps> = (props
                     <DockPanelItem key="eclEditor" title={nlsHPCC.ECL}>
                         <HolyGrail
                             main={<ECLSourceEditor text={query} setEditor={setEditor} />}
-                            footer={<div ref={setToolbarContainer} />}
+                            footer={<ECLEditorToolbar
+                                editor={editor} setSyntaxErrors={setSyntaxErrors}
+                                syntaxStatusIcon={syntaxStatusIcon} setSyntaxStatusIcon={setSyntaxStatusIcon}
+                                workunit={workunit} setWorkunit={setWorkunit}
+                                outputMode={outputMode} setOutputMode={setOutputMode}
+                            />}
                         />
                     </DockPanelItem>
                     <DockPanelItem key="graph" title={nlsHPCC.Graphs} location="split-right" relativeTo="eclEditor">
@@ -506,14 +511,5 @@ export const ECLPlayground: React.FunctionComponent<ECLPlaygroundProps> = (props
                 </DockPanel>
             }
         />
-        {toolbarContainer && createPortal(
-            <ECLEditorToolbar
-                editor={editor} setSyntaxErrors={setSyntaxErrors}
-                syntaxStatusIcon={syntaxStatusIcon} setSyntaxStatusIcon={setSyntaxStatusIcon}
-                workunit={workunit} setWorkunit={setWorkunit}
-                outputMode={outputMode} setOutputMode={setOutputMode}
-            />,
-            toolbarContainer
-        )}
     </div>;
 };

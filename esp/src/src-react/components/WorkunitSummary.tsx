@@ -233,11 +233,13 @@ export const WorkunitSummary: React.FunctionComponent<WorkunitSummaryProps> = ({
     React.useEffect(() => {
         if (dockpanel && layout) {
             //  Should only happen once on startup  ---
-            const dpLayout: any = dockpanel.getLayout();
-            if (Array.isArray(dpLayout?.main?.sizes) && dpLayout.main.sizes.length === 2) {
-                dpLayout.main.sizes = layout;
-                dockpanel.layout(dpLayout).lazyRender();
-            }
+            window.setTimeout(() => {
+                const dpLayout: any = dockpanel.getLayout();
+                if (Array.isArray(dpLayout?.main?.sizes) && dpLayout.main.sizes.length === 2) {
+                    dpLayout.main.sizes = layout;
+                    dockpanel.layout(dpLayout).render();
+                }
+            }, 100);
         }
     }, [dockpanel, layout]);
 
